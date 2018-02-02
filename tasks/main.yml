@@ -1,0 +1,43 @@
+---
+- name: Create directories for Solr cores.
+  file:
+    path: "{{ solr_home }}/data/{{ item }}/conf"
+    state: directory
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+    recurse: yes
+  with_items: "{{ drupal_solr_cores }}"
+
+- name: Download Search API Solr module.
+  get_url:
+    url: "https://ftp.drupal.org/files/projects/search_api_solr-{{ search_api_solr_version }}.tar.gz"
+    dest: "{{ drupal_solr_workspace }}/search_api_solr-{{ search_api_solr_version }}.tar.gz"
+    force: no
+  register: search_api_solr_download_status
+
+- name: Expand Search API Solr module.
+  unarchive:
+    src: "{{ drupal_solr_workspace }}/search_api_solr-{{ search_api_solr_version }}.tar.gz"
+    dest: "{{ drupal_solr_workspace }}"
+    remote_src: yes
+  when: search_api_solr_download_status.changed
+
+- name: Copy configuration files from Search API Solr module to core.
+  shell: "cp -r {{ drupal_solr_workspace }}/search_api_solr/solr-conf/{{ drupal_solr_version }}/* {{ solr_home }}/data/{{ item }}/conf"
+  with_items: "{{ drupal_solr_cores }}"
+  become: yes
+  become_user: "{{ solr_user }}"
+
+- name: Add core properties file.
+  template:
+    src: core.properties.j2
+    dest: "{{ solr_home }}/data/{{ item }}/core.properties"
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+  with_items: "{{ drupal_solr_cores }}"
+
+- name: restart solr
+  service:
+    name: "{{ solr_service_name }}"
+    state: restarted
+    sleep: 5
