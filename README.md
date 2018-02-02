@@ -1,6 +1,6 @@
 Creates Solr cores for Drupal 8 websites.
 
-This role will create and configure Apache Solr cores as required for the [Search API Solr](https://www.drupal.org/project/search_api_solr) module.
+This Ansible role will create and configure Apache Solr cores as required for the [Search API Solr](https://www.drupal.org/project/search_api_solr) module.
 
 Currently supports version 8.x-1.2 of the Search API Solr module.
 
