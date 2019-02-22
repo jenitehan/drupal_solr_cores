@@ -2,6 +2,7 @@
 
 solr_user: solr
 solr_service_name: solr
+solr_install_path: "/opt/{{ solr_service_name }}"
 solr_home: "/var/{{ solr_service_name }}"
 
 drupal_solr_workspace: "/home/{{ solr_user }}"
@@ -9,5 +10,6 @@ drupal_solr_workspace: "/home/{{ solr_user }}"
 drupal_solr_cores:
   - drupal1
 
-search_api_solr_version: 8.x-1.2
-drupal_solr_version: 6.x
+search_api_solr_version: 8.x-2.6
+drupal_solr_version: 7.x
+drupal_solr_config_archive: "config_files/solr_7.x_config.zip"

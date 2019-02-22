@@ -13,6 +13,7 @@
     url: "https://ftp.drupal.org/files/projects/search_api_solr-{{ search_api_solr_version }}.tar.gz"
     dest: "{{ drupal_solr_workspace }}/search_api_solr-{{ search_api_solr_version }}.tar.gz"
     force: no
+  when: drupal_solr_version != '7.x'
   register: search_api_solr_download_status
 
 - name: Expand Search API Solr module.
@@ -20,6 +21,7 @@
     src: "{{ drupal_solr_workspace }}/search_api_solr-{{ search_api_solr_version }}.tar.gz"
     dest: "{{ drupal_solr_workspace }}"
     remote_src: yes
+  when: drupal_solr_version != '7.x'
   when: search_api_solr_download_status.changed
 
 - name: Copy configuration files from Search API Solr module to core.
@@ -27,6 +29,26 @@
   with_items: "{{ drupal_solr_cores }}"
   become: yes
   become_user: "{{ solr_user }}"
+  when: drupal_solr_version != '7.x'
+
+- name: Add configuration for Solr 7 and above.
+  unarchive:
+    src: "{{ drupal_solr_config_archive }}"
+    dest: "{{ solr_home }}/data/{{ item }}/conf"
+  with_items: "{{ drupal_solr_cores }}"
+  become: yes
+  become_user: "{{ solr_user }}"
+  when: drupal_solr_version == '7.x'
+
+- name: Set Solr install directory in Solr 7 config.
+  lineinfile:
+    dest: "{{ solr_home }}/data/{{ item }}/conf/solrcore.properties"
+    line: "solr.install.dir={{ solr_install_path }}"
+    state: present
+  become: yes
+  become_user: "{{ solr_user }}"
+  with_items: "{{ drupal_solr_cores }}"
+  when: drupal_solr_version == '7.x'
 
 - name: Add core properties file.
   template:
